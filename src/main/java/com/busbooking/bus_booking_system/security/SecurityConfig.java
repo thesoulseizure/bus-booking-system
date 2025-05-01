@@ -56,7 +56,7 @@ public class SecurityConfig {
         // Allow both local development and Railway frontend
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
-            "https://bus-booking-frontend.up.railway.app"
+            "https://bus-booking-frontend.onrender.com"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
