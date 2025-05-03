@@ -17,7 +17,7 @@ const Booking = () => {
         const fetchBus = async () => {
             if (!token || !busId) return;
             try {
-                const response = await axios.get(`http://localhost:8082/api/buses/${busId}`, {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/buses/${busId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setBus(response.data);
@@ -65,7 +65,7 @@ const Booking = () => {
 
         try {
             const response = await axios.post(
-                'http://localhost:8082/api/bookings',
+                `${process.env.REACT_APP_API_URL}/api/bookings`,
                 { busId: parseInt(busId), passengers },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
