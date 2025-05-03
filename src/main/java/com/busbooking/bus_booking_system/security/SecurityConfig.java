@@ -34,18 +34,20 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Permit public access to React routes and static resources
                         .requestMatchers("/", "/login", "/booking", "/index.html", "/static/**", "/css/**", "/js/**").permitAll()
-                        // Permit API endpoints for authentication
+                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Permit access to register and profile pages
                         .requestMatchers("/register.html", "/profile.html").permitAll()
-                        // Require authentication for all other API endpoints
                         .requestMatchers("/api/**").authenticated()
-                        // All other requests require authentication
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            System.out.println("Authentication failed for request: " + request.getRequestURI());
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                        })
+                );
 
         return http.build();
     }
@@ -53,7 +55,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow both local development and Railway frontend
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
             "https://bus-booking-system-frontend.onrender.com"
