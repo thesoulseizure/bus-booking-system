@@ -16,7 +16,7 @@ const BusList = () => {
                 return;
             }
             try {
-                const response = await axios.get('http://localhost:8082/api/buses', {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/buses`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setBuses(response.data);
