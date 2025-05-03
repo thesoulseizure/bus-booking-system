@@ -15,18 +15,29 @@ function Login() {
     e.preventDefault();
     setError('');
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, formData, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
+            Pragma: 'no-cache', // For older browsers
+          },
+        }
+      );
       const { token } = response.data;
+      if (!token) {
+        throw new Error('No token received from the server');
+      }
       localStorage.setItem('token', token);
-      setError('');
       alert('Login successful!');
       navigate('/buses');
     } catch (err) {
-      const errorMessage = err.response?.data || 'Login failed';
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Login failed';
       setError(errorMessage);
       console.error('Login error:', err);
+      console.log('Error response:', err.response); // Log the full response for debugging
     }
   };
 
@@ -58,7 +69,7 @@ function Login() {
                     className="form-control"
                     id="password"
                     name="password"
-                    value={formData.password}
+                    value={formData.email}
                     onChange={handleChange}
                     required
                   />
