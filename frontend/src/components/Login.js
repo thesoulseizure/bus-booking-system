@@ -15,7 +15,7 @@ function Login() {
     e.preventDefault();
     setError('');
     try {
-      const response = await axios.post('http://localhost:8082/api/auth/login', formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, formData, {
         headers: { 'Content-Type': 'application/json' },
       });
       const { token } = response.data;
