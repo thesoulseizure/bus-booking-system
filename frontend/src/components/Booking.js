@@ -15,22 +15,45 @@ const Booking = () => {
 
     useEffect(() => {
         const fetchBus = async () => {
-            if (!token || !busId) return;
+            if (!token) {
+                setError('Please login to book a ticket');
+                navigate('/login');
+                return;
+            }
+            if (!busId) {
+                setError('No bus ID provided. Please select a bus.');
+                return;
+            }
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/buses/${busId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        Pragma: 'no-cache',
+                    },
                 });
                 setBus(response.data);
             } catch (err) {
+                if (err.response?.status === 401) {
+                    setError('Session expired. Please login again.');
+                    localStorage.removeItem('token');
+                    navigate('/login');
+                } else if (err.response?.status === 404) {
+                    setError('Bus not found. Please select a different bus.');
+                } else {
+                    setError(err.response?.data?.error || err.response?.data?.message || 'Failed to load bus details.');
+                }
                 console.error('Error fetching bus:', err);
-                setError('Failed to load bus details.');
+                console.log('Error response:', err.response);
             }
         };
         fetchBus();
-    }, [token, busId]);
+    }, [token, busId, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+
         if (!token) {
             setError('Please login to book a ticket');
             navigate('/login');
@@ -45,6 +68,7 @@ const Booking = () => {
             return;
         }
 
+        // Validate passenger fields
         const seatNumbers = new Set();
         for (const p of passengers) {
             if (!p.name || !p.age || !p.seatNumber) {
@@ -55,7 +79,19 @@ const Booking = () => {
                 setError(`Seat number ${p.seatNumber} is already selected`);
                 return;
             }
-            const seatNum = parseInt(p.seatNumber.replace(/\D/g, ''));
+            // Validate age
+            const age = parseInt(p.age);
+            if (isNaN(age) || age < 1 || age > 120) {
+                setError(`Invalid age for passenger: ${p.age}. Must be between 1 and 120.`);
+                return;
+            }
+            // Validate seat number (assuming format like "A1", extract number for validation)
+            const seatNumMatch = p.seatNumber.match(/\d+/);
+            if (!seatNumMatch) {
+                setError(`Invalid seat number format for ${p.seatNumber}. Include a number (e.g., A1).`);
+                return;
+            }
+            const seatNum = parseInt(seatNumMatch[0]);
             if (isNaN(seatNum) || seatNum < 1 || seatNum > bus.availableSeats) {
                 setError(`Seat number ${p.seatNumber} is invalid. Must be between 1 and ${bus.availableSeats}.`);
                 return;
@@ -67,15 +103,27 @@ const Booking = () => {
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/bookings`,
                 { busId: parseInt(busId), passengers },
-                { headers: { Authorization: `Bearer ${token}` } }
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        Pragma: 'no-cache',
+                    },
+                }
             );
             console.log('Booking response:', response.data);
-            setError('');
             alert('Booking successful!');
             navigate('/profile');
         } catch (err) {
-            console.error('Booking error details:', err.response);
-            setError(err.response?.data || 'Booking failed');
+            if (err.response?.status === 401) {
+                setError('Session expired. Please login again.');
+                localStorage.removeItem('token');
+                navigate('/login');
+            } else {
+                setError(err.response?.data?.error || err.response?.data?.message || 'Booking failed');
+            }
+            console.error('Booking error:', err);
+            console.log('Error response:', err.response);
         }
     };
 
