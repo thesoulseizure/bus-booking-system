@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from 'axios'; // Use the default axios, not the intercepted instance
 import { Link, useNavigate } from 'react-router-dom';
 
 function Register() {
@@ -21,18 +21,21 @@ function Register() {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
-            Pragma: 'no-cache', // For older browsers
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
           },
+          withCredentials: true,
         }
       );
       alert('Registration successful! Please login.');
       navigate('/login');
     } catch (err) {
-      const errorMessage = err.response?.data || 'Registration failed';
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.response?.data || 'Registration failed';
       setError(errorMessage);
       console.error('Registration error:', err);
-      console.log('Error response:', err.response); // Log the full response for debugging
+      console.log('Error response:', err.response);
+      console.log('Error status:', err.response?.status);
+      console.log('Error headers:', err.response?.headers);
     }
   };
 
