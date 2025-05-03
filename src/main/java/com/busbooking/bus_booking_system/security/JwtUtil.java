@@ -21,7 +21,12 @@ public class JwtUtil {
     private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours in seconds
 
     public JwtUtil(@Value("${jwt.secret}") String secretKey) {
-        this.signingKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        // Validate key length (must be at least 32 bytes for 256 bits)
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            throw new IllegalArgumentException("JWT secret key must be at least 32 characters long to meet the 256-bit requirement for HMAC-SHA.");
+        }
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String getUsernameFromToken(String token) {
@@ -50,7 +55,7 @@ public class JwtUtil {
         return expiration.before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) { // Changed parameter type to UserDetails
+    public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         return doGenerateToken(claims, userDetails.getUsername());
     }
