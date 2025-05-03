@@ -15,15 +15,24 @@ function Register() {
     e.preventDefault();
     setError('');
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, formData, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/register`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
+            Pragma: 'no-cache', // For older browsers
+          },
+        }
+      );
       alert('Registration successful! Please login.');
       navigate('/login');
     } catch (err) {
       const errorMessage = err.response?.data || 'Registration failed';
       setError(errorMessage);
       console.error('Registration error:', err);
+      console.log('Error response:', err.response); // Log the full response for debugging
     }
   };
 
