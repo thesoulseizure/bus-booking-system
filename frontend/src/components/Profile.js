@@ -20,18 +20,33 @@ const Profile = () => {
             }
             try {
                 const userResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/profile`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
+                        Pragma: 'no-cache',
+                    },
                 });
                 setUser(userResponse.data);
                 setFormData({ name: userResponse.data.name, email: userResponse.data.email, password: '' });
 
                 const bookingsResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/bookings/history`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        Pragma: 'no-cache',
+                    },
                 });
                 setBookings(bookingsResponse.data);
             } catch (err) {
-                setError(err.response?.data || 'Failed to load profile');
+                if (err.response?.status === 401) {
+                    setError('Session expired. Please login again.');
+                    localStorage.removeItem('token'); // Clear invalid token
+                    navigate('/login');
+                } else {
+                    setError(err.response?.data?.error || err.response?.data?.message || 'Failed to load profile');
+                }
                 console.error('Profile error:', err);
+                console.log('Error response:', err.response);
             }
         };
         fetchProfile();
@@ -39,6 +54,7 @@ const Profile = () => {
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
+        setError(''); // Clear any previous errors
         setFormData({ ...formData, password: '' });
     };
 
@@ -52,17 +68,32 @@ const Profile = () => {
             const updateRequest = {
                 name: formData.name,
                 email: formData.email,
-                password: formData.password || null
+                password: formData.password || null,
             };
-            const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/users/profile`, updateRequest, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await axios.put(
+                `${process.env.REACT_APP_API_URL}/api/users/profile`,
+                updateRequest,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        Pragma: 'no-cache',
+                    },
+                }
+            );
             setUser(response.data);
             setIsEditing(false);
             alert('Profile updated successfully!');
         } catch (err) {
-            setError(err.response?.data || 'Failed to update profile');
+            if (err.response?.status === 401) {
+                setError('Session expired. Please login again.');
+                localStorage.removeItem('token');
+                navigate('/login');
+            } else {
+                setError(err.response?.data?.error || err.response?.data?.message || 'Failed to update profile');
+            }
             console.error('Update error:', err);
+            console.log('Error response:', err.response);
         }
     };
 
@@ -148,7 +179,7 @@ const Profile = () => {
                                                         {bookings.map(booking => (
                                                             <tr key={booking.id}>
                                                                 <td>{booking.id}</td>
-                                                                <td>{booking.bus.fromLocation} to {booking.bus.toLocation}</td>
+                                                                <td>{booking.bus?.fromLocation} to {booking.bus?.toLocation}</td>
                                                                 <td>{new Date(booking.bookingTime).toLocaleString()}</td>
                                                                 <td>{booking.status}</td>
                                                             </tr>
