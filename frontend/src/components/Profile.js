@@ -19,13 +19,13 @@ const Profile = () => {
                 return;
             }
             try {
-                const userResponse = await axios.get('http://localhost:8082/api/users/profile', {
+                const userResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/profile`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setUser(userResponse.data);
                 setFormData({ name: userResponse.data.name, email: userResponse.data.email, password: '' });
 
-                const bookingsResponse = await axios.get('http://localhost:8082/api/bookings/history', {
+                const bookingsResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/bookings/history`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setBookings(bookingsResponse.data);
@@ -54,7 +54,7 @@ const Profile = () => {
                 email: formData.email,
                 password: formData.password || null
             };
-            const response = await axios.put('http://localhost:8082/api/users/profile', updateRequest, {
+            const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/users/profile`, updateRequest, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser(response.data);
