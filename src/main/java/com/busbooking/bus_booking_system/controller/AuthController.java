@@ -28,23 +28,19 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-   @PostMapping("/register")
-public ResponseEntity<?> register(@RequestBody User user) {
-    System.out.println("Received registration request: " + user.getEmail());
-    if (userRepository.findByName(user.getName()).isPresent()) {
-        System.out.println("Name already exists: " + user.getName());
-        return ResponseEntity.badRequest().body("Name already exists");
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        if (userRepository.findByName(user.getName()).isPresent()) {
+            return ResponseEntity.badRequest().body("Name already exists");
+        }
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("ROLE_USER");
+        userRepository.save(user);
+        return ResponseEntity.ok("User registered successfully");
     }
-    if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-        System.out.println("Email already exists: " + user.getEmail());
-        return ResponseEntity.badRequest().body("Email already exists");
-    }
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-    user.setRole("ROLE_USER");
-    userRepository.save(user);
-    System.out.println("User registered successfully: " + user.getEmail());
-    return ResponseEntity.ok("User registered successfully");
-}
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
