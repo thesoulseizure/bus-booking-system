@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             System.out.println("Authentication failed for request: " + request.getRequestURI());
-                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"); // Changed to 401
                         })
                 );
 
