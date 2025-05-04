@@ -10,7 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 @Entity
 @Data
@@ -25,12 +25,15 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role == null) {
+            return Collections.emptyList(); // Return empty list if role is null
+        }
         return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override
     public String getUsername() {
-        return email; // Change from name to email
+        return email;
     }
 
     @Override
