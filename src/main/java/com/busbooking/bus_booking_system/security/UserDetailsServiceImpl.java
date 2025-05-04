@@ -6,6 +6,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.User; // Add this import
+
+import java.util.ArrayList; // Add this import
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -20,6 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        return user;
+        // Convert the User entity to a UserDetails object
+        return new User(user.getEmail(), user.getPassword(), new ArrayList<>());
     }
 }
