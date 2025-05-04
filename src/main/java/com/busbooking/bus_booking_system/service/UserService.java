@@ -30,6 +30,11 @@ public class UserService {
                 });
     }
 
+    public User findByEmail(String email) {
+        logger.info("Finding user by email: {}", email);
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
     public User updateProfile(String email, UserUpdateRequest updateRequest) {
         logger.info("Updating profile for user: {}", email);
         User user = userRepository.findByEmail(email)
