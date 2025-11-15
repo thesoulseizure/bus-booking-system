@@ -1,3 +1,4 @@
+// src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,6 +7,9 @@ function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // Use a safe backend base (falls back to current origin)
+  const backendBase = process.env.REACT_APP_API_URL || window.location.origin;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,14 +20,15 @@ function Login() {
     setError('');
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        `${backendBase}/api/auth/login`,
         formData,
         {
           headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
-            Pragma: 'no-cache', // For older browsers
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
           },
+          withCredentials: false, // adjust if your backend uses cookies
         }
       );
       const { token } = response.data;
@@ -31,13 +36,13 @@ function Login() {
         throw new Error('No token received from the server');
       }
       localStorage.setItem('token', token);
+      // success UX
       alert('Login successful!');
       navigate('/buses');
     } catch (err) {
       const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Login failed';
       setError(errorMessage);
-      console.error('Login error:', err);
-      console.log('Error response:', err.response); // Log the full response for debugging
+      console.error('Login error:', err.response ?? err);
     }
   };
 
@@ -49,7 +54,18 @@ function Login() {
             <div className="card-body p-5">
               <h2 className="card-title text-center mb-4">Login</h2>
               {error && <div className="alert alert-danger text-center" role="alert">{error}</div>}
-              <form onSubmit={handleSubmit}>
+
+              {/* dummy hidden field reduces aggressive browser autofill issues */}
+              <form onSubmit={handleSubmit} autoComplete="on" noValidate>
+                <input
+                  type="text"
+                  name="fake_username"
+                  id="fake_username"
+                  autoComplete="off"
+                  style={{ display: 'none' }}
+                  tabIndex={-1}
+                />
+
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">Email</label>
                   <input
@@ -60,8 +76,10 @@ function Login() {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    autoComplete="username"
                   />
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="password" className="form-label">Password</label>
                   <input
@@ -69,13 +87,16 @@ function Login() {
                     className="form-control"
                     id="password"
                     name="password"
-                    value={formData.email}
+                    value={formData.password}               // <-- FIXED here
                     onChange={handleChange}
                     required
+                    autoComplete="current-password"
                   />
                 </div>
+
                 <button type="submit" className="btn btn-primary w-100">Login</button>
               </form>
+
               <p className="mt-3 text-center">
                 Don't have an account? <Link to="/register" className="text-primary">Register</Link>
               </p>
