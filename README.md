@@ -1,5 +1,5 @@
 # 🚌 **Bus Booking System**
-### **Full-Stack Real-Time Ticketing Platform (React + Spring Boot + PostgreSQL)**
+### **Full-Stack Bus Ticketing Platform (React + Spring Boot + PostgreSQL)**
 
 <p align="center">
   <img src="https://img.shields.io/badge/Frontend-React_18-blue?style=for-the-badge&logo=react" />
