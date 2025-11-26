@@ -178,7 +178,7 @@ bus-booking-system/
 ---
 
 ## <details>
-<summary><strong>🗄 Database Screenshots (PostgreSQL)</strong></summary>
+<summary><strong>🗄 Database Screenshots </strong></summary>
 
 ![](screenshots/database%201.png)
 ![](screenshots/database%202.png)
