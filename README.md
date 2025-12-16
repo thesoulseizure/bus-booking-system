@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
 </p>
 
-A production-grade bus reservation platform built using **React**, **Spring Boot**, and **PostgreSQL**, deployed on **Render** with modern engineering principles, modular backend architecture, and a clean scalable user interface.
+A bus reservation platform built using **React**, **Spring Boot**, and **PostgreSQL**, deployed on **Render** with modern engineering principles, modular backend architecture, and a clean scalable user interface.
 
 ---
 
