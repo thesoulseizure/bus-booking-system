@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Bus Ticketing Platform Banner">
+</p>
+
 # 🚌 **Bus Booking System**
 ### **Full-Stack Bus Ticketing Platform (React + Spring Boot + PostgreSQL)**
 
